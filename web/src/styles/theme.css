@@ -30,10 +30,11 @@ body, html, #root {
   user-select: none;
 }
 
-/* Vintage oceanic cartography styling - vibrant blue oceans + warm parchment land */
-.vintage-parchment-tiles {
-  filter: url(#tempo-blue-ocean-filter) contrast(1.05) saturate(1.1);
-  -webkit-filter: url(#tempo-blue-ocean-filter) contrast(1.05) saturate(1.1);
+/* Vintage labels overlay */
+.vintage-labels-layer {
+  mix-blend-mode: multiply;
+  opacity: 0.9;
+  filter: contrast(1.15) brightness(0.85);
 }
 
 /* Orbit circle overlay */

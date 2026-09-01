@@ -10,7 +10,7 @@ export interface WorldMapProps {
   onSelectCluster?: (cluster: TraceCluster) => void;
 }
 
-// Leaflet custom Canvas Tile Layer: transforms every tile in-memory to guaranteed deep blue oceans and parchment land
+// Leaflet custom Canvas Tile Layer: renders 3D shaded mountain relief and deep oceanic blue
 const VintageOceanCanvasLayer = L.TileLayer.extend({
   createTile(coords: L.Coords, done: L.DoneCallback): HTMLElement {
     const tile = document.createElement('canvas');
@@ -33,25 +33,19 @@ const VintageOceanCanvasLayer = L.TileLayer.extend({
           const r = d[i];
           const g = d[i + 1];
           const b = d[i + 2];
-          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
 
-          if (lum < 165) {
-            // Country labels, text & international boundaries -> sharp slate navy (#1e2832)
-            d[i] = Math.floor(r * 0.25 + 24);
-            d[i + 1] = Math.floor(g * 0.25 + 36);
-            d[i + 2] = Math.floor(b * 0.25 + 52);
-          } else if (b > r + 2 || lum < 230) {
-            // Oceans / Sea water -> rich, deep oceanic maritime blue (#3f586f)
-            const t = Math.max(0, Math.min(1, (lum - 170) / 60));
-            d[i] = Math.floor(52 + t * 20);
-            d[i + 1] = Math.floor(74 + t * 24);
-            d[i + 2] = Math.floor(102 + t * 28);
+          if (b > r + 14) {
+            // Oceans & Water bodies -> deep rich oceanic slate blue (#3d566e)
+            d[i] = 61;
+            d[i + 1] = 86;
+            d[i + 2] = 110;
           } else {
-            // Landmasses -> high-contrast warm antique parchment (#ebe0c7)
-            const t = Math.max(0, Math.min(1, (lum - 230) / 25));
-            d[i] = Math.floor(232 + t * 8);
-            d[i + 1] = Math.floor(220 + t * 8);
-            d[i + 2] = Math.floor(196 + t * 6);
+            // Mountain shaded relief on warm antique parchment (#ebe0c8)
+            const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 255.0;
+            const shade = Math.min(1.25, Math.max(0.4, lum / 0.88));
+            d[i] = Math.floor(Math.min(255, 235 * shade));
+            d[i + 1] = Math.floor(Math.min(255, 224 * shade));
+            d[i + 2] = Math.floor(Math.min(255, 200 * shade));
           }
         }
         ctx.putImageData(imgData, 0, 0);
@@ -93,12 +87,22 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
     const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
 
-    // Canvas Tile Layer with live pixel processing for oceanic blue waters and parchment land
+    // 1. Base Layer: Shaded mountain relief + oceanic slate blue
     new (VintageOceanCanvasLayer as any)(
-      `https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png?key=${cartoKey}`,
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
       {
+        maxZoom: 18,
+      }
+    ).addTo(map);
+
+    // 2. Overlay Layer: Soft, high-resolution retina typography & clean boundaries
+    L.tileLayer(
+      `https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png?key=${cartoKey}`,
+      {
+        className: 'vintage-labels-layer',
         subdomains: 'abcd',
         maxZoom: 19,
+        opacity: 0.85,
       }
     ).addTo(map);
 
