@@ -2,6 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { TraceCluster } from '../types/trace';
 import { createClusterIcon } from './ClusterMarker';
+import countryLines from '../data_country_lines.json';
+import stateLines from '../data_state_lines.json';
+import { GEO_LABELS } from '../data/labels';
 
 export interface WorldMapProps {
   clusters: TraceCluster[];
@@ -71,21 +74,22 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerGroupRef = useRef<L.LayerGroup | null>(null);
+  const stateBoundariesRef = useRef<L.GeoJSON | null>(null);
+  const labelsGroupRef = useRef<L.LayerGroup | null>(null);
 
   // Initialize Leaflet map
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
+    const initialZoom = zoom || 3;
     const map = L.map(mapContainerRef.current, {
       center: [38.0, -95.0],
-      zoom: zoom || 3,
+      zoom: initialZoom,
       minZoom: 2,
       maxZoom: 16,
       zoomControl: false,
       attributionControl: false,
     });
-
-    const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
 
     // 1. Base Layer: Shaded mountain relief + oceanic slate blue
     new (VintageOceanCanvasLayer as any)(
@@ -95,22 +99,73 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       }
     ).addTo(map);
 
-    // 2. Overlay Layer: Soft, high-resolution retina typography & clean boundaries
-    L.tileLayer(
-      `https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png?key=${cartoKey}`,
-      {
-        className: 'vintage-labels-layer',
-        subdomains: 'abcd',
-        maxZoom: 19,
-        opacity: 0.85,
-      }
-    ).addTo(map);
+    // 2. National Boundary Lines (Always visible)
+    L.geoJSON(countryLines as any, {
+      style: {
+        color: '#8a7d66',
+        weight: 1.2,
+        opacity: 0.75,
+      },
+      interactive: false,
+    }).addTo(map);
 
+    // 3. State & Provincial Boundary Lines (Visible at zoom >= 5)
+    const stateLayer = L.geoJSON(stateLines as any, {
+      style: {
+        color: '#9c8f78',
+        weight: 1.0,
+        dashArray: '3, 4',
+        opacity: 0.65,
+      },
+      interactive: false,
+    });
+    stateBoundariesRef.current = stateLayer;
+    if (initialZoom >= 5) {
+      stateLayer.addTo(map);
+    }
+
+    // 4. Bespoke American-Centric Vector Labels Layer
+    const labelsGroup = L.layerGroup().addTo(map);
+    labelsGroupRef.current = labelsGroup;
+
+    const renderLabels = (z: number) => {
+      labelsGroup.clearLayers();
+      GEO_LABELS.forEach((l) => {
+        if (z >= l.minZoom && (!l.maxZoom || z <= l.maxZoom)) {
+          const icon = L.divIcon({
+            className: 'custom-geo-label-icon',
+            html: `<div class="geo-label-${l.type}">${l.name}</div>`,
+            iconSize: [200, 24],
+            iconAnchor: [100, 12],
+          });
+          L.marker([l.lat, l.lng], { icon, interactive: false }).addTo(labelsGroup);
+        }
+      });
+    };
+
+    renderLabels(initialZoom);
+
+    // 5. Clusters Marker Group
     const markerGroup = L.layerGroup().addTo(map);
     markerGroupRef.current = markerGroup;
 
     map.on('zoomend', () => {
-      onZoomChange(map.getZoom());
+      const currentZoom = map.getZoom();
+      onZoomChange(currentZoom);
+
+      // Toggle state/provincial boundaries based on zoom
+      if (currentZoom >= 5) {
+        if (!map.hasLayer(stateLayer)) {
+          stateLayer.addTo(map);
+        }
+      } else {
+        if (map.hasLayer(stateLayer)) {
+          map.removeLayer(stateLayer);
+        }
+      }
+
+      // Update American-centric labels
+      renderLabels(currentZoom);
     });
 
     mapInstanceRef.current = map;
