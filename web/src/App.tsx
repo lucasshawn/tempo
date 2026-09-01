@@ -2,14 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { WorldMap } from './components/WorldMap';
 import { Header } from './components/Header';
 import { TimelineOverlay } from './components/TimelineOverlay';
+import { TraceFlyoutPanel } from './components/TraceFlyoutPanel';
 import { fetchTimelineSummary, fetchTraces } from './services/api';
-import { TimelineSummary, TraceCluster } from './types/trace';
+import { TimelineSummary, TraceCluster, TraceContext } from './types/trace';
 
 export const App: React.FC = () => {
   const [timeline, setTimeline] = useState<TimelineSummary | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [zoom, setZoom] = useState<number>(3);
   const [clusters, setClusters] = useState<TraceCluster[]>([]);
+  const [selectedTrace, setSelectedTrace] = useState<TraceContext | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +36,9 @@ export const App: React.FC = () => {
 
     const currentIso = timeline.timeSlices[currentIndex];
     if (!currentIso) return;
+
+    // Dismiss open flyout when time slice changes
+    setSelectedTrace(null);
 
     fetchTraces(currentIso, zoom)
       .then((res) => {
@@ -61,6 +66,14 @@ export const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [isPlaying, timeline]);
 
+  const handleSelectCluster = (cluster?: TraceCluster) => {
+    if (cluster && (cluster.count === 1 || !cluster.isCluster) && cluster.event) {
+      setSelectedTrace(cluster.event);
+    } else {
+      setSelectedTrace(null);
+    }
+  };
+
   return (
     <div
       className="tempo-app"
@@ -77,7 +90,14 @@ export const App: React.FC = () => {
         clusters={clusters}
         zoom={zoom}
         onZoomChange={setZoom}
+        onSelectCluster={handleSelectCluster}
       />
+      {selectedTrace && (
+        <TraceFlyoutPanel
+          trace={selectedTrace}
+          onClose={() => setSelectedTrace(null)}
+        />
+      )}
       {timeline && timeline.timeSlices && timeline.timeSlices.length > 0 && (
         <TimelineOverlay
           timeSlices={timeline.timeSlices}

@@ -10,7 +10,7 @@ export interface WorldMapProps {
   clusters: TraceCluster[];
   zoom: number;
   onZoomChange: (zoom: number) => void;
-  onSelectCluster?: (cluster: TraceCluster) => void;
+  onSelectCluster?: (cluster?: TraceCluster) => void;
 }
 
 // Leaflet custom Canvas Tile Layer: renders 3D shaded mountain relief and oceanic relief
@@ -94,6 +94,11 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   const markerGroupRef = useRef<L.LayerGroup | null>(null);
   const stateBoundariesRef = useRef<L.GeoJSON | null>(null);
   const labelsGroupRef = useRef<L.LayerGroup | null>(null);
+  const onSelectClusterRef = useRef(onSelectCluster);
+
+  useEffect(() => {
+    onSelectClusterRef.current = onSelectCluster;
+  }, [onSelectCluster]);
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -184,6 +189,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     const markerGroup = L.layerGroup().addTo(map);
     markerGroupRef.current = markerGroup;
 
+    // Listen to map background click to dismiss selection
+    map.on('click', () => {
+      if (onSelectClusterRef.current) {
+        onSelectClusterRef.current(undefined as any);
+      }
+    });
+
     map.on('zoomend', () => {
       const currentZoom = map.getZoom();
       onZoomChange(currentZoom);
@@ -239,7 +251,8 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       const icon = createClusterIcon(c);
       const marker = L.marker([c.latitude, c.longitude], { icon });
 
-      marker.on('click', () => {
+      marker.on('click', (e) => {
+        L.DomEvent.stopPropagation(e);
         if (onSelectCluster) {
           onSelectCluster(c);
         }
@@ -268,6 +281,8 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           const currentZoom = mapInstanceRef.current.getZoom();
           if (currentZoom < 10) {
             mapInstanceRef.current.setView([c.latitude, c.longitude], Math.min(14, currentZoom + 2), { animate: true });
+          } else {
+            mapInstanceRef.current.panTo([c.latitude, c.longitude], { animate: true });
           }
         }
       });
