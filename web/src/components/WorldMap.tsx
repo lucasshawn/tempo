@@ -37,18 +37,22 @@ const VintageOceanCanvasLayer = L.TileLayer.extend({
           const g = d[i + 1];
           const b = d[i + 2];
 
-          if (b > r + 14) {
-            // Oceans & Water bodies -> lighter, elegant maritime slate blue (#516e88)
-            d[i] = 81;
-            d[i + 1] = 110;
-            d[i + 2] = 136;
+          const isWater = b > r + 8 && b > g - 12;
+
+          if (isWater) {
+            // Subtle oceanic bathymetry relief on maritime slate blue (#516e88)
+            const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 175.0;
+            const oceanShade = 0.78 + (lum - 1.0) * 0.45; // subtle relief contrast
+            d[i] = Math.floor(Math.max(45, Math.min(135, 81 * oceanShade)));
+            d[i + 1] = Math.floor(Math.max(65, Math.min(165, 110 * oceanShade)));
+            d[i + 2] = Math.floor(Math.max(85, Math.min(195, 136 * oceanShade)));
           } else {
             // Mountain shaded relief on warm antique parchment (#ebe0c8)
-            const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 255.0;
-            const shade = Math.min(1.25, Math.max(0.4, lum / 0.88));
-            d[i] = Math.floor(Math.min(255, 235 * shade));
-            d[i + 1] = Math.floor(Math.min(255, 224 * shade));
-            d[i + 2] = Math.floor(Math.min(255, 200 * shade));
+            const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 235.0;
+            const shade = Math.min(1.20, Math.max(0.5, lum));
+            d[i] = Math.floor(Math.max(0, Math.min(255, 235 * shade)));
+            d[i + 1] = Math.floor(Math.max(0, Math.min(255, 224 * shade)));
+            d[i + 2] = Math.floor(Math.max(0, Math.min(255, 200 * shade)));
           }
         }
         ctx.putImageData(imgData, 0, 0);
@@ -89,11 +93,14 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       maxZoom: 16,
       zoomControl: false,
       attributionControl: false,
+      doubleClickZoom: true,
+      scrollWheelZoom: true,
     });
+    (window as any).__tempoMap = map;
 
-    // 1. Base Layer: Shaded mountain relief + oceanic slate blue
+    // 1. Base Layer: Subtle oceanic bathymetry relief + mountain shaded relief
     new (VintageOceanCanvasLayer as any)(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
       {
         maxZoom: 18,
       }
