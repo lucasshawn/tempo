@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { WorldMap } from './components/WorldMap';
 import { Header } from './components/Header';
 import { TimelineOverlay } from './components/TimelineOverlay';
+import { AdminLogin } from './components/admin/AdminLogin';
+import { AdminDashboard } from './components/admin/AdminDashboard';
 import { fetchTimelineSummary, fetchTraces } from './services/api';
 import { TimelineSummary, TraceCluster } from './types/trace';
 
 export const App: React.FC = () => {
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    return typeof window !== 'undefined' ? window.location.pathname : '/';
+  });
+
+  const [adminToken, setAdminToken] = useState<string | null>(() => {
+    return typeof window !== 'undefined' ? sessionStorage.getItem('tempo_admin_token') : null;
+  });
+
+  const [adminEmail, setAdminEmail] = useState<string>(() => {
+    return typeof window !== 'undefined' ? (sessionStorage.getItem('tempo_admin_email') || '') : '';
+  });
+
   const [timeline, setTimeline] = useState<TimelineSummary | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [zoom, setZoom] = useState<number>(3);
@@ -13,8 +27,41 @@ export const App: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Initial Timeline Fetch
+  // Listen to popstate event for browser back/forward navigation
   useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = useCallback((path: string) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+  }, []);
+
+  const handleLoginSuccess = useCallback((token: string, userEmail: string) => {
+    sessionStorage.setItem('tempo_admin_token', token);
+    sessionStorage.setItem('tempo_admin_email', userEmail);
+    setAdminToken(token);
+    setAdminEmail(userEmail);
+  }, []);
+
+  const handleSignOut = useCallback(() => {
+    sessionStorage.removeItem('tempo_admin_token');
+    sessionStorage.removeItem('tempo_admin_email');
+    setAdminToken(null);
+    setAdminEmail('');
+  }, []);
+
+  const isAdminRoute = currentPath === '/admin' || currentPath.startsWith('/admin/');
+
+  // 1. Initial Timeline Fetch (only when on map route)
+  useEffect(() => {
+    if (isAdminRoute) return;
+
     fetchTimelineSummary()
       .then((data) => {
         setTimeline(data);
@@ -26,11 +73,11 @@ export const App: React.FC = () => {
         console.error('Failed to load timeline:', err);
         setError('Failed to connect to Tempo API backend');
       });
-  }, []);
+  }, [isAdminRoute]);
 
-  // 2. Fetch Traces on time slice or zoom change
+  // 2. Fetch Traces on time slice or zoom change (only when on map route)
   useEffect(() => {
-    if (!timeline || !timeline.timeSlices || timeline.timeSlices.length === 0) return;
+    if (isAdminRoute || !timeline || !timeline.timeSlices || timeline.timeSlices.length === 0) return;
 
     const currentIso = timeline.timeSlices[currentIndex];
     if (!currentIso) return;
@@ -42,11 +89,11 @@ export const App: React.FC = () => {
       .catch((err) => {
         console.error('Failed to load traces:', err);
       });
-  }, [timeline, currentIndex, zoom]);
+  }, [isAdminRoute, timeline, currentIndex, zoom]);
 
   // 3. Playback timer (steps through slices every 1.8 seconds)
   useEffect(() => {
-    if (!isPlaying || !timeline || !timeline.timeSlices || timeline.timeSlices.length === 0) return;
+    if (isAdminRoute || !isPlaying || !timeline || !timeline.timeSlices || timeline.timeSlices.length === 0) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => {
@@ -59,8 +106,30 @@ export const App: React.FC = () => {
     }, 1800);
 
     return () => clearInterval(timer);
-  }, [isPlaying, timeline]);
+  }, [isAdminRoute, isPlaying, timeline]);
 
+  // Render Admin View if on /admin route
+  if (isAdminRoute) {
+    if (!adminToken) {
+      return (
+        <AdminLogin
+          onLoginSuccess={handleLoginSuccess}
+          onNavigateHome={() => navigateTo('/')}
+        />
+      );
+    }
+
+    return (
+      <AdminDashboard
+        token={adminToken}
+        userEmail={adminEmail}
+        onSignOut={handleSignOut}
+        onNavigateHome={() => navigateTo('/')}
+      />
+    );
+  }
+
+  // Render main World Map view
   return (
     <div
       className="tempo-app"
@@ -72,7 +141,7 @@ export const App: React.FC = () => {
         backgroundColor: 'var(--color-bg-water)',
       }}
     >
-      <Header />
+      <Header onNavigateAdmin={() => navigateTo('/admin')} />
       <WorldMap
         clusters={clusters}
         zoom={zoom}

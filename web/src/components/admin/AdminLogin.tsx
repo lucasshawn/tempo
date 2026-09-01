@@ -8,10 +8,12 @@ import {
   X,
   HelpCircle,
   Terminal,
+  ArrowLeft,
 } from 'lucide-react';
 
 export interface AdminLoginProps {
   onLoginSuccess: (token: string, userEmail: string) => void;
+  onNavigateHome?: () => void;
 }
 
 const AUTHORIZED_EMAIL = 'lucasshawn@gmail.com';
@@ -43,7 +45,7 @@ function decodeJwtPayload(token: string): DecodedTokenPayload | null {
   }
 }
 
-export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
+export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onNavigateHome }) => {
   const [clientId, setClientId] = useState<string>(() => {
     return (
       localStorage.getItem(STORAGE_KEY_CLIENT_ID) ||
@@ -239,6 +241,33 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
           zIndex: 10,
         }}
       >
+        {onNavigateHome && (
+          <div style={{ marginBottom: '16px' }}>
+            <button
+              type="button"
+              onClick={onNavigateHome}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                backgroundColor: 'rgba(36, 44, 52, 0.6)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="Return to World Map"
+            >
+              <ArrowLeft size={13} />
+              <span>Map View</span>
+            </button>
+          </div>
+        )}
+
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div

@@ -1,7 +1,20 @@
 import React from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Shield } from 'lucide-react';
 
-export const Header: React.FC = () => {
+export interface HeaderProps {
+  onNavigateAdmin?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onNavigateAdmin }) => {
+  const handleAdminClick = () => {
+    if (onNavigateAdmin) {
+      onNavigateAdmin();
+    } else {
+      window.history.pushState({}, '', '/admin');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    }
+  };
+
   return (
     <header
       style={{
@@ -60,26 +73,58 @@ export const Header: React.FC = () => {
         W O R L D
       </h1>
 
-      {/* Right Options */}
-      <button
-        aria-label="Options"
+      {/* Right Controls */}
+      <div
         style={{
-          pointerEvents: 'auto',
-          width: '36px',
-          height: '36px',
-          borderRadius: '50%',
-          border: '1.5px solid var(--color-gold-bright)',
-          backgroundColor: 'rgba(30, 36, 42, 0.4)',
-          backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          color: 'var(--color-gold-bright)',
+          gap: '10px',
+          pointerEvents: 'auto',
         }}
       >
-        <MoreHorizontal size={18} />
-      </button>
+        <button
+          onClick={handleAdminClick}
+          aria-label="Admin Telemetry Dashboard"
+          title="Admin Telemetry Dashboard"
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            border: '1.5px solid var(--color-gold-bright)',
+            backgroundColor: 'rgba(30, 36, 42, 0.4)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: 'var(--color-gold-bright)',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <Shield size={18} />
+        </button>
+
+        <button
+          aria-label="Options"
+          title="Options"
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            border: '1.5px solid var(--color-gold-bright)',
+            backgroundColor: 'rgba(30, 36, 42, 0.4)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: 'var(--color-gold-bright)',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <MoreHorizontal size={18} />
+        </button>
+      </div>
     </header>
   );
 };
