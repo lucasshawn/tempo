@@ -38,10 +38,10 @@ const VintageOceanCanvasLayer = L.TileLayer.extend({
           const b = d[i + 2];
 
           if (b > r + 14) {
-            // Oceans & Water bodies -> deep rich oceanic slate blue (#3d566e)
-            d[i] = 61;
-            d[i + 1] = 86;
-            d[i + 2] = 110;
+            // Oceans & Water bodies -> lighter, elegant maritime slate blue (#516e88)
+            d[i] = 81;
+            d[i + 1] = 110;
+            d[i + 2] = 136;
           } else {
             // Mountain shaded relief on warm antique parchment (#ebe0c8)
             const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 255.0;
