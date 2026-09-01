@@ -197,3 +197,51 @@ body, html, #root {
 .marker-single-badge:hover {
   transform: scale(1.2);
 }
+
+/* ==========================================================================
+   Admin Telemetry & Live Log Viewer Styles
+   ========================================================================== */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
+}
+
+@keyframes admin-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.admin-spin-icon {
+  animation: admin-spin 1s linear infinite;
+}
+
+/* Custom scrollbar for dark admin dashboard & logs table */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(18, 23, 28, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(229, 193, 88, 0.25);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 193, 88, 0.45);
+}
+
