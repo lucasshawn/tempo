@@ -18,6 +18,9 @@ spec:
         - name: tempo-api
           image: tempo-api:latest
           imagePullPolicy: IfNotPresent
+          env:
+            - name: AUTHORIZED_ADMIN_EMAILS
+              value: "lucasshawn@gmail.com"
           ports:
             - containerPort: 8080
               name: http
