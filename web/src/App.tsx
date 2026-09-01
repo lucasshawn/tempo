@@ -4,8 +4,9 @@ import { Header } from './components/Header';
 import { TimelineOverlay } from './components/TimelineOverlay';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { TraceFlyoutPanel } from './components/TraceFlyoutPanel';
 import { fetchTimelineSummary, fetchTraces } from './services/api';
-import { TimelineSummary, TraceCluster } from './types/trace';
+import { TimelineSummary, TraceCluster, TraceContext } from './types/trace';
 
 export const App: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -24,6 +25,7 @@ export const App: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [zoom, setZoom] = useState<number>(3);
   const [clusters, setClusters] = useState<TraceCluster[]>([]);
+  const [selectedTrace, setSelectedTrace] = useState<TraceContext | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,7 +77,12 @@ export const App: React.FC = () => {
       });
   }, [isAdminRoute]);
 
-  // 2. Fetch Traces on time slice or zoom change (only when on map route)
+  // 2. Dismiss open flyout when timeline index changes
+  useEffect(() => {
+    setSelectedTrace(null);
+  }, [currentIndex]);
+
+  // 3. Fetch Traces on time slice or zoom change (only when on map route)
   useEffect(() => {
     if (isAdminRoute || !timeline || !timeline.timeSlices || timeline.timeSlices.length === 0) return;
 
@@ -107,6 +114,14 @@ export const App: React.FC = () => {
 
     return () => clearInterval(timer);
   }, [isAdminRoute, isPlaying, timeline]);
+
+  const handleSelectCluster = (cluster?: TraceCluster) => {
+    if (cluster && (cluster.count === 1 || !cluster.isCluster) && cluster.event) {
+      setSelectedTrace(cluster.event);
+    } else {
+      setSelectedTrace(null);
+    }
+  };
 
   // Render Admin View if on /admin route
   if (isAdminRoute) {
@@ -146,7 +161,14 @@ export const App: React.FC = () => {
         clusters={clusters}
         zoom={zoom}
         onZoomChange={setZoom}
+        onSelectCluster={handleSelectCluster}
       />
+      {selectedTrace && (
+        <TraceFlyoutPanel
+          trace={selectedTrace}
+          onClose={() => setSelectedTrace(null)}
+        />
+      )}
       {timeline && timeline.timeSlices && timeline.timeSlices.length > 0 && (
         <TimelineOverlay
           timeSlices={timeline.timeSlices}
