@@ -115,9 +115,9 @@ export const App: React.FC = () => {
           gap: '2px',
         }}
       >
-        <div style={{ color: 'var(--color-gold-bright)', fontWeight: 600 }}>ENVIRONMENT: Development</div>
-        <div style={{ color: '#e2e8f0', fontWeight: 500 }}>BUILD: v1.4.0 (Shaded Relief & Retina Typography)</div>
-        <div style={{ color: '#94a3b8', fontSize: '10px' }}>BUILD DATE/TIME: 2026-09-01 07:15:00 UTC</div>
+        <div style={{ color: 'var(--color-gold-bright)', fontWeight: 600 }}>ENVIRONMENT: minikube</div>
+        <div style={{ color: '#e2e8f0', fontWeight: 500 }}>BUILD: v1.4.1 (Shaded Relief & Retina Typography)</div>
+        <div style={{ color: '#94a3b8', fontSize: '10px' }}>BUILD DATE/TIME: 2026-09-01 07:20:00 UTC</div>
       </div>
 
       {error && (
