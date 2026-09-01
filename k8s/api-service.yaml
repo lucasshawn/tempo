@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-api-service
+  labels:
+    app: tempo-api
+spec:
+  type: ClusterIP
+  selector:
+    app: tempo-api
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo-web
+  labels:
+    app: tempo-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tempo-web
+  template:
+    metadata:
+      labels:
+        app: tempo-web
+    spec:
+      containers:
+        - name: tempo-web
+          image: tempo-web:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
