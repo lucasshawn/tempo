@@ -1,5 +1,5 @@
 :root {
-  --color-bg-water: #788998;
+  --color-bg-water: #5c7385;
   --color-land-parchment: #e8dfc8;
   --color-land-border: #cfc2a7;
   --color-gold-bright: #e5c158;
@@ -30,9 +30,9 @@ body, html, #root {
   user-select: none;
 }
 
-/* Vintage parchment filter for map tiles */
+/* Vintage oceanic cartography styling - vibrant oceanic slate-blue waters + warm land */
 .vintage-parchment-tiles {
-  filter: sepia(0.35) contrast(0.95) brightness(1.02) hue-rotate(-12deg);
+  filter: contrast(1.12) saturate(1.45) brightness(0.95) hue-rotate(-6deg);
 }
 
 /* Orbit circle overlay */
