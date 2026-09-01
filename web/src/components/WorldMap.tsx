@@ -35,11 +35,10 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
     const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
 
-    // Clean cartographic tile layer with warm parchment filter
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${cartoKey}`, {
+    // Vintage topographic basemap (rich blue oceans + shaded terrain relief)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
       className: 'vintage-parchment-tiles',
-      subdomains: 'abcd',
-      maxZoom: 19,
+      maxZoom: 18,
     }).addTo(map);
 
     const markerGroup = L.layerGroup().addTo(map);

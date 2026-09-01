@@ -32,7 +32,7 @@ body, html, #root {
 
 /* Vintage oceanic cartography styling - vibrant oceanic slate-blue waters + warm land */
 .vintage-parchment-tiles {
-  filter: contrast(1.12) saturate(1.45) brightness(0.95) hue-rotate(-6deg);
+  filter: contrast(1.04) saturate(1.1) brightness(0.98);
 }
 
 /* Orbit circle overlay */
