@@ -77,7 +77,6 @@ func ClusterTraces(traces []models.TraceContext, zoom int) []models.TraceCluster
 	}
 
 	clusters := make([]models.TraceCluster, 0, len(grid))
-	idx := 0
 	for key, acc := range grid {
 		count := len(acc.traces)
 		avgLat := acc.sumLat / float64(count)
@@ -101,7 +100,7 @@ func ClusterTraces(traces []models.TraceContext, zoom int) []models.TraceCluster
 			})
 		} else {
 			clusters = append(clusters, models.TraceCluster{
-				ID:        fmt.Sprintf("cluster-%s-%d", key, idx),
+				ID:        fmt.Sprintf("cluster-%s", key),
 				Latitude:  avgLat,
 				Longitude: avgLng,
 				Count:     count,
@@ -114,7 +113,6 @@ func ClusterTraces(traces []models.TraceContext, zoom int) []models.TraceCluster
 				},
 			})
 		}
-		idx++
 	}
 
 	return clusters
