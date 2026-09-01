@@ -30,15 +30,17 @@ export const App: React.FC = () => {
       });
   }, []);
 
-  // 2. Fetch Traces on time slice or zoom change
+  // 2. Dismiss open flyout when timeline index changes
+  useEffect(() => {
+    setSelectedTrace(null);
+  }, [currentIndex]);
+
+  // 3. Fetch Traces on time slice or zoom change
   useEffect(() => {
     if (!timeline || !timeline.timeSlices || timeline.timeSlices.length === 0) return;
 
     const currentIso = timeline.timeSlices[currentIndex];
     if (!currentIso) return;
-
-    // Dismiss open flyout when time slice changes
-    setSelectedTrace(null);
 
     fetchTraces(currentIso, zoom)
       .then((res) => {
