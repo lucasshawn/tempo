@@ -91,6 +91,26 @@ export const App: React.FC = () => {
           }}
         />
       )}
+      {/* Lower-left version watermark */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '16px',
+          left: '24px',
+          zIndex: 1000,
+          fontSize: '11px',
+          letterSpacing: '0.14em',
+          color: 'rgba(255, 255, 255, 0.45)',
+          fontFamily: 'var(--font-sans-body)',
+          pointerEvents: 'none',
+          textTransform: 'uppercase',
+          userSelect: 'none',
+          fontWeight: 500,
+        }}
+      >
+        TEMPO v1.2.0 • BLUE OCEAN
+      </div>
+
       {error && (
         <div
           style={{

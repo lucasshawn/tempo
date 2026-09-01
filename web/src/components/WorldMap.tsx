@@ -33,10 +33,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       attributionControl: false,
     });
 
-    // Vintage topographic basemap (rich blue oceans + shaded terrain relief)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+    const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
+
+    // Authenticated CARTO light_all basemap processed with blue oceanic filter
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png?key=${cartoKey}`, {
       className: 'vintage-parchment-tiles',
-      maxZoom: 18,
+      subdomains: 'abcd',
+      maxZoom: 19,
     }).addTo(map);
 
     const markerGroup = L.layerGroup().addTo(map);
