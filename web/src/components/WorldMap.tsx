@@ -34,7 +34,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     });
 
     const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
-    const keyParam = cartoKey ? `?key=${cartoKey}` : '';
+    const keyParam = cartoKey ? `?key=${cartoKey}&api_key=${cartoKey}&v=auth_clean` : '';
 
     // Clean cartographic tile layer with warm parchment filter
     L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png${keyParam}`, {
