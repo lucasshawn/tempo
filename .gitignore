@@ -1,1 +1,6 @@
 web/.env
+TUNNEL_URL.txt
+tunnel.log
+.worktrees/
+worktrees/
+
