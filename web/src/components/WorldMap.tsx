@@ -13,8 +13,21 @@ export interface WorldMapProps {
   onSelectCluster?: (cluster: TraceCluster) => void;
 }
 
-// Leaflet custom Canvas Tile Layer: renders 3D shaded mountain relief and deep oceanic blue
+// Leaflet custom Canvas Tile Layer: renders 3D shaded mountain relief and oceanic relief
 const VintageOceanCanvasLayer = L.TileLayer.extend({
+  getTileUrl(coords: L.Coords): string {
+    if (coords.z >= 6) {
+      return L.Util.template(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
+        coords
+      );
+    }
+    return L.Util.template(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}',
+      coords
+    );
+  },
+
   createTile(coords: L.Coords, done: L.DoneCallback): HTMLElement {
     const tile = document.createElement('canvas');
     tile.width = 256;
@@ -32,12 +45,13 @@ const VintageOceanCanvasLayer = L.TileLayer.extend({
       try {
         const imgData = ctx.getImageData(0, 0, 256, 256);
         const d = imgData.data;
+        const isShadedRelief = coords.z >= 6;
         for (let i = 0; i < d.length; i += 4) {
           const r = d[i];
           const g = d[i + 1];
           const b = d[i + 2];
 
-          const isWater = b > r + 8 && b > g - 12;
+          const isWater = isShadedRelief ? (b > r + 14) : (b > r + 8 && b > g - 12);
 
           if (isWater) {
             // Light, elegant maritime slate blue with subtle oceanic bathymetry relief (#5f7b94)
@@ -49,7 +63,7 @@ const VintageOceanCanvasLayer = L.TileLayer.extend({
           } else {
             // Mountain shaded relief on warm antique parchment (#ebe0c8)
             const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 235.0;
-            const shade = Math.min(1.20, Math.max(0.5, lum));
+            const shade = Math.min(1.20, Math.max(0.45, isShadedRelief ? lum / 0.88 : lum));
             d[i] = Math.floor(Math.max(0, Math.min(255, 235 * shade)));
             d[i + 1] = Math.floor(Math.max(0, Math.min(255, 224 * shade)));
             d[i + 2] = Math.floor(Math.max(0, Math.min(255, 200 * shade)));
@@ -139,11 +153,12 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       labelsGroup.clearLayers();
       GEO_LABELS.forEach((l) => {
         if (z >= l.minZoom && (!l.maxZoom || z <= l.maxZoom)) {
+          const isCity = l.type === 'city';
           const icon = L.divIcon({
             className: 'custom-geo-label-icon',
             html: `<div class="geo-label-${l.type}">${l.name}</div>`,
-            iconSize: [200, 24],
-            iconAnchor: [100, 12],
+            iconSize: isCity ? [160, 20] : [200, 24],
+            iconAnchor: isCity ? [2, 10] : [100, 12],
           });
           L.marker([l.lat, l.lng], { icon, interactive: false }).addTo(labelsGroup);
         }
