@@ -145,7 +145,21 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       stateLayer.addTo(map);
     }
 
-    // 4. Bespoke American-Centric Vector Labels Layer
+    // 4. Comprehensive City/Town Labels Layer (All towns and cities proportional to zoom)
+    const cartoLabelsLayer = L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png?key=cb1_2orj_1_263a710e118c5efbcc95c551',
+      {
+        subdomains: 'abcd',
+        maxZoom: 18,
+        minZoom: 6,
+        className: 'carto-voyager-labels',
+      }
+    );
+    if (initialZoom >= 6) {
+      cartoLabelsLayer.addTo(map);
+    }
+
+    // 5. Bespoke American-Centric Vector Labels Layer
     const labelsGroup = L.layerGroup().addTo(map);
     labelsGroupRef.current = labelsGroup;
 
@@ -167,7 +181,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
     renderLabels(initialZoom);
 
-    // 5. Clusters Marker Group
+    // 6. Clusters Marker Group
     const markerGroup = L.layerGroup().addTo(map);
     markerGroupRef.current = markerGroup;
 
@@ -183,6 +197,17 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       } else {
         if (map.hasLayer(stateLayer)) {
           map.removeLayer(stateLayer);
+        }
+      }
+
+      // Toggle comprehensive towns/cities labels layer
+      if (currentZoom >= 6) {
+        if (!map.hasLayer(cartoLabelsLayer)) {
+          cartoLabelsLayer.addTo(map);
+        }
+      } else {
+        if (map.hasLayer(cartoLabelsLayer)) {
+          map.removeLayer(cartoLabelsLayer);
         }
       }
 

@@ -116,8 +116,8 @@ export const App: React.FC = () => {
         }}
       >
         <div style={{ color: 'var(--color-gold-bright)', fontWeight: 600 }}>ENVIRONMENT: minikube</div>
-        <div style={{ color: '#e2e8f0', fontWeight: 500 }}>BUILD: v1.6.1 (Clean Terrain & Multi-Tier Cities Hierarchy)</div>
-        <div style={{ color: '#94a3b8', fontSize: '10px' }}>BUILD DATE/TIME: 2026-09-01 07:55:00 UTC</div>
+        <div style={{ color: '#e2e8f0', fontWeight: 500 }}>BUILD: v1.7.0 (Global Towns & Cities Scale Hierarchy)</div>
+        <div style={{ color: '#94a3b8', fontSize: '10px' }}>BUILD DATE/TIME: 2026-09-01 08:00:00 UTC</div>
       </div>
 
       {error && (
