@@ -158,3 +158,23 @@ func TestCollector_Concurrency(t *testing.T) {
 		t.Fatalf("expected %d hits for /api/resource, got %d", expectedTotal, m.EndpointHits["/api/resource"])
 	}
 }
+
+func TestCollector_DiskUsageMetrics(t *testing.T) {
+	rb := telemetry.NewRingBuffer(10)
+	collector := telemetry.NewCollector(rb)
+	metrics := collector.GetMetrics()
+
+	if metrics.DiskTotalBytes == 0 {
+		t.Errorf("expected DiskTotalBytes > 0, got %d", metrics.DiskTotalBytes)
+	}
+	if metrics.DiskFreeBytes > metrics.DiskTotalBytes {
+		t.Errorf("expected DiskFreeBytes (%d) <= DiskTotalBytes (%d)", metrics.DiskFreeBytes, metrics.DiskTotalBytes)
+	}
+	expectedUsed := metrics.DiskTotalBytes - metrics.DiskFreeBytes
+	if metrics.DiskUsedBytes != expectedUsed {
+		t.Errorf("expected DiskUsedBytes (%d) == DiskTotalBytes - DiskFreeBytes (%d)", metrics.DiskUsedBytes, expectedUsed)
+	}
+	if metrics.DiskUsedPercent < 0 || metrics.DiskUsedPercent > 100 {
+		t.Errorf("expected DiskUsedPercent between 0 and 100, got %f", metrics.DiskUsedPercent)
+	}
+}

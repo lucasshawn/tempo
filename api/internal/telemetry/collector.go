@@ -2,7 +2,6 @@ package telemetry
 
 import (
 	"math"
-	"os"
 	"runtime"
 	"sync"
 	"sync/atomic"
@@ -104,20 +103,4 @@ func (c *Collector) GetMetrics() SystemMetrics {
 		RequestsPerMin:  math.Round(rpm*100) / 100,
 		EndpointHits:    hitsCopy,
 	}
-}
-
-// Fallback / cross-platform disk usage
-func getDiskUsage() (uint64, uint64, uint64, float64) {
-	// Standard estimate or statfs fallback
-	total := uint64(50 * 1024 * 1024 * 1024) // 50 GB default
-	free := uint64(35 * 1024 * 1024 * 1024)  // 35 GB default
-	used := total - free
-	percent := (float64(used) / float64(total)) * 100.0
-
-	// Check if directory exists
-	if _, err := os.Stat("/"); err == nil {
-		// Use os stats if available
-	}
-
-	return total, free, used, math.Round(percent*10) / 10
 }

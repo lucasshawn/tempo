@@ -22,6 +22,7 @@ type GoogleTokenInfo struct {
 // GoogleAuth handles Google OAuth2 ID token verification and HTTP auth middleware.
 type GoogleAuth struct {
 	authorizedEmails map[string]bool
+	expectedClientID string
 	httpClient       *http.Client
 	tokenInfoURL     string
 }
@@ -55,6 +56,7 @@ func NewGoogleAuth(allowedEmails []string) *GoogleAuth {
 
 	return &GoogleAuth{
 		authorizedEmails: emailMap,
+		expectedClientID: os.Getenv("GOOGLE_CLIENT_ID"),
 		httpClient:       &http.Client{Timeout: 5 * time.Second},
 	}
 }
@@ -62,6 +64,11 @@ func NewGoogleAuth(allowedEmails []string) *GoogleAuth {
 // IsAuthorized checks if the specified email is present in the authorized list.
 func (g *GoogleAuth) IsAuthorized(email string) bool {
 	return g.authorizedEmails[strings.ToLower(strings.TrimSpace(email))]
+}
+
+// SetExpectedClientID configures the expected Google Client ID audience (useful for unit testing or runtime config).
+func (g *GoogleAuth) SetExpectedClientID(clientID string) {
+	g.expectedClientID = clientID
 }
 
 // SetHTTPClient configures a custom HTTP client (useful for unit testing).
@@ -105,6 +112,10 @@ func (g *GoogleAuth) VerifyToken(idToken string) (string, error) {
 
 	if info.ErrorDesc != "" || info.Email == "" {
 		return "", fmt.Errorf("invalid token: %s", info.ErrorDesc)
+	}
+
+	if g.expectedClientID != "" && info.Audience != g.expectedClientID {
+		return "", errors.New("forbidden: token audience does not match configured Google Client ID")
 	}
 
 	if strings.ToLower(info.EmailVerified) != "true" {
