@@ -34,21 +34,12 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     });
 
     const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
-    const keyParam = cartoKey ? `?key=${cartoKey}&api_key=${cartoKey}&v=auth_clean` : '';
 
     // Clean cartographic tile layer with warm parchment filter
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png${keyParam}`, {
+    L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${cartoKey}`, {
       className: 'vintage-parchment-tiles',
       subdomains: 'abcd',
       maxZoom: 19,
-    }).addTo(map);
-
-    // Subtle country labels
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}.png${keyParam}`, {
-      className: 'vintage-parchment-tiles',
-      subdomains: 'abcd',
-      maxZoom: 19,
-      opacity: 0.65,
     }).addTo(map);
 
     const markerGroup = L.layerGroup().addTo(map);
