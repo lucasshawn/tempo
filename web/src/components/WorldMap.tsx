@@ -151,11 +151,11 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       {
         subdomains: 'abcd',
         maxZoom: 18,
-        minZoom: 6,
+        minZoom: 5,
         className: 'carto-voyager-labels',
       }
     );
-    if (initialZoom >= 6) {
+    if (initialZoom >= 5) {
       cartoLabelsLayer.addTo(map);
     }
 
@@ -167,12 +167,11 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       labelsGroup.clearLayers();
       GEO_LABELS.forEach((l) => {
         if (z >= l.minZoom && (!l.maxZoom || z <= l.maxZoom)) {
-          const isCity = l.type === 'city';
           const icon = L.divIcon({
             className: 'custom-geo-label-icon',
             html: `<div class="geo-label-${l.type}">${l.name}</div>`,
-            iconSize: isCity ? [160, 20] : [200, 24],
-            iconAnchor: isCity ? [2, 10] : [100, 12],
+            iconSize: [200, 24],
+            iconAnchor: [100, 12],
           });
           L.marker([l.lat, l.lng], { icon, interactive: false }).addTo(labelsGroup);
         }
@@ -201,7 +200,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       }
 
       // Toggle comprehensive towns/cities labels layer
-      if (currentZoom >= 6) {
+      if (currentZoom >= 5) {
         if (!map.hasLayer(cartoLabelsLayer)) {
           cartoLabelsLayer.addTo(map);
         }
