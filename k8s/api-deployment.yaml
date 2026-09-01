@@ -21,6 +21,8 @@ spec:
           env:
             - name: AUTHORIZED_ADMIN_EMAILS
               value: "lucasshawn@gmail.com"
+            - name: GOOGLE_CLIENT_ID
+              value: "71655949258-0ffsi3r94epoukeqea8mac4pdu5egvqm.apps.googleusercontent.com"
           ports:
             - containerPort: 8080
               name: http
