@@ -7,7 +7,8 @@ import (
 )
 
 func getGridSize(zoom int) float64 {
-	// Degrees per cell based on zoom level (e.g. 500sqmi ~ 3-5 deg at global zoom 2)
+	// Degrees per cell based on zoom level
+	// Zoom >= 13 provides ~2-mile resolution (~0.029 degrees)
 	switch {
 	case zoom <= 2:
 		return 8.0
@@ -18,9 +19,12 @@ func getGridSize(zoom int) float64 {
 	case zoom <= 8:
 		return 0.5
 	case zoom <= 10:
-		return 0.1
+		return 0.15
+	case zoom <= 12:
+		return 0.06
 	default:
-		return 0.02
+		// ~2 miles resolution (~0.029 degrees)
+		return 0.029
 	}
 }
 

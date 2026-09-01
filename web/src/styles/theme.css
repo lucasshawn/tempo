@@ -68,32 +68,32 @@ body, html, #root {
   border-radius: 50%;
   color: #ffffff;
   font-weight: 600;
-  font-size: 15px;
   font-family: var(--font-sans-body);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 0 12px rgba(229, 193, 88, 0.35);
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
 }
 
 .marker-cluster-badge:hover {
-  transform: scale(1.12);
+  transform: scale(1.15);
 }
 
-.marker-single-ring {
-  position: relative;
+.marker-single-badge {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: radial-gradient(circle, #2d3742 0%, #1c232b 100%);
+  border: 1.5px solid var(--color-gold-bright);
   border-radius: 50%;
-  border: 2px solid var(--color-gold-bright);
-  background: rgba(229, 193, 88, 0.15);
-  box-shadow: 0 0 10px rgba(229, 193, 88, 0.4);
+  color: var(--color-gold-bright);
+  font-weight: 600;
+  font-size: 13px;
+  font-family: var(--font-sans-body);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35), 0 0 8px rgba(229, 193, 88, 0.25);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
 }
 
-.marker-single-ring::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--color-gold-bright);
-  border-radius: 50%;
-  box-shadow: 0 0 4px #fff;
+.marker-single-badge:hover {
+  transform: scale(1.2);
 }

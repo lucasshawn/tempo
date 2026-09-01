@@ -28,7 +28,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       center: [38.0, -95.0],
       zoom: zoom || 3,
       minZoom: 2,
-      maxZoom: 10,
+      maxZoom: 16,
       zoomControl: false,
       attributionControl: false,
     });
@@ -78,11 +78,32 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         if (onSelectCluster) {
           onSelectCluster(c);
         }
-        if (c.isCluster && mapInstanceRef.current) {
-          mapInstanceRef.current.setView(
-            [c.latitude, c.longitude],
-            Math.min(10, mapInstanceRef.current.getZoom() + 1)
-          );
+        if (!mapInstanceRef.current) return;
+
+        // If count > 1, zoom in to reveal distinct traces (down to ~2mi resolution at zoom 13-14)
+        if (c.count > 1 || c.isCluster) {
+          const latSpan = Math.abs(c.bounds.maxLat - c.bounds.minLat);
+          const lngSpan = Math.abs(c.bounds.maxLng - c.bounds.minLng);
+
+          if (latSpan > 0.001 || lngSpan > 0.001) {
+            mapInstanceRef.current.fitBounds(
+              [
+                [c.bounds.minLat, c.bounds.minLng],
+                [c.bounds.maxLat, c.bounds.maxLng],
+              ],
+              { maxZoom: 14, padding: [60, 60], animate: true }
+            );
+          } else {
+            const currentZoom = mapInstanceRef.current.getZoom();
+            const targetZoom = Math.min(14, Math.max(currentZoom + 3, 13));
+            mapInstanceRef.current.setView([c.latitude, c.longitude], targetZoom, { animate: true });
+          }
+        } else {
+          // Single trace click - center view smoothly
+          const currentZoom = mapInstanceRef.current.getZoom();
+          if (currentZoom < 10) {
+            mapInstanceRef.current.setView([c.latitude, c.longitude], Math.min(14, currentZoom + 2), { animate: true });
+          }
         }
       });
 
