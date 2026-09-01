@@ -51,6 +51,13 @@ body, html, #root {
 }
 
 /* Marker Styling */
+.leaflet-div-icon,
+.custom-single-marker,
+.custom-cluster-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
 .marker-cluster-badge {
   display: flex;
   align-items: center;
