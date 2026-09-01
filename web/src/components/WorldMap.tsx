@@ -33,8 +33,6 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       attributionControl: false,
     });
 
-    const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
-
     // Vintage topographic basemap (rich blue oceans + shaded terrain relief)
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
       className: 'vintage-parchment-tiles',
