@@ -91,24 +91,33 @@ export const App: React.FC = () => {
           }}
         />
       )}
-      {/* Lower-left version watermark */}
+      {/* Lower-left version stamp */}
       <div
         style={{
           position: 'absolute',
-          bottom: '16px',
+          bottom: '20px',
           left: '24px',
-          zIndex: 1000,
+          zIndex: 1500,
+          backgroundColor: 'rgba(20, 26, 32, 0.75)',
+          border: '1px solid rgba(212, 175, 55, 0.4)',
+          borderRadius: '8px',
+          padding: '8px 14px',
+          backdropFilter: 'blur(8px)',
+          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.4)',
           fontSize: '11px',
-          letterSpacing: '0.14em',
-          color: 'rgba(255, 255, 255, 0.45)',
+          letterSpacing: '0.08em',
+          color: '#f1f5f9',
           fontFamily: 'var(--font-sans-body)',
           pointerEvents: 'none',
-          textTransform: 'uppercase',
           userSelect: 'none',
-          fontWeight: 500,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px',
         }}
       >
-        TEMPO v1.2.0 • BLUE OCEAN
+        <div style={{ color: 'var(--color-gold-bright)', fontWeight: 600 }}>ENVIRONMENT: Development</div>
+        <div style={{ color: '#e2e8f0', fontWeight: 500 }}>BUILD: v1.3.0 (Canvas Engine)</div>
+        <div style={{ color: '#94a3b8', fontSize: '10px' }}>BUILD DATE/TIME: 2026-09-01 07:00:00 UTC</div>
       </div>
 
       {error && (

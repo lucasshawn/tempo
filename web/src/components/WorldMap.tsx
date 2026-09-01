@@ -10,6 +10,64 @@ export interface WorldMapProps {
   onSelectCluster?: (cluster: TraceCluster) => void;
 }
 
+// Leaflet custom Canvas Tile Layer: transforms every tile in-memory to guaranteed deep blue oceans and parchment land
+const VintageOceanCanvasLayer = L.TileLayer.extend({
+  createTile(coords: L.Coords, done: L.DoneCallback): HTMLElement {
+    const tile = document.createElement('canvas');
+    tile.width = 256;
+    tile.height = 256;
+    const ctx = tile.getContext('2d');
+
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      if (!ctx) {
+        done(undefined, tile);
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      try {
+        const imgData = ctx.getImageData(0, 0, 256, 256);
+        const d = imgData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i];
+          const g = d[i + 1];
+          const b = d[i + 2];
+          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+
+          if (lum < 165) {
+            // Country labels, text & international boundaries -> sharp slate navy (#1e2832)
+            d[i] = Math.floor(r * 0.25 + 24);
+            d[i + 1] = Math.floor(g * 0.25 + 36);
+            d[i + 2] = Math.floor(b * 0.25 + 52);
+          } else if (b > r + 2 || lum < 230) {
+            // Oceans / Sea water -> rich, deep oceanic maritime blue (#3f586f)
+            const t = Math.max(0, Math.min(1, (lum - 170) / 60));
+            d[i] = Math.floor(52 + t * 20);
+            d[i + 1] = Math.floor(74 + t * 24);
+            d[i + 2] = Math.floor(102 + t * 28);
+          } else {
+            // Landmasses -> high-contrast warm antique parchment (#ebe0c7)
+            const t = Math.max(0, Math.min(1, (lum - 230) / 25));
+            d[i] = Math.floor(232 + t * 8);
+            d[i + 1] = Math.floor(220 + t * 8);
+            d[i + 2] = Math.floor(196 + t * 6);
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+      } catch (e) {
+        // Fallback
+      }
+      done(undefined, tile);
+    };
+    img.onerror = (err) => {
+      done(err as any, tile);
+    };
+    img.src = this.getTileUrl(coords);
+    return tile;
+  },
+});
+
 export const WorldMap: React.FC<WorldMapProps> = ({
   clusters,
   zoom,
@@ -35,12 +93,14 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
     const cartoKey = import.meta.env.VITE_CARTO_API_KEY || 'cb1_2orj_1_263a710e118c5efbcc95c551';
 
-    // Authenticated CARTO light_all basemap processed with blue oceanic filter
-    L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png?key=${cartoKey}`, {
-      className: 'vintage-parchment-tiles',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map);
+    // Canvas Tile Layer with live pixel processing for oceanic blue waters and parchment land
+    new (VintageOceanCanvasLayer as any)(
+      `https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png?key=${cartoKey}`,
+      {
+        subdomains: 'abcd',
+        maxZoom: 19,
+      }
+    ).addTo(map);
 
     const markerGroup = L.layerGroup().addTo(map);
     markerGroupRef.current = markerGroup;
