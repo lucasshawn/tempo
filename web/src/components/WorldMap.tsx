@@ -40,12 +40,12 @@ const VintageOceanCanvasLayer = L.TileLayer.extend({
           const isWater = b > r + 8 && b > g - 12;
 
           if (isWater) {
-            // Subtle oceanic bathymetry relief on maritime slate blue (#516e88)
+            // Light, elegant maritime slate blue with subtle oceanic bathymetry relief (#5f7b94)
             const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 175.0;
-            const oceanShade = 0.78 + (lum - 1.0) * 0.45; // subtle relief contrast
-            d[i] = Math.floor(Math.max(45, Math.min(135, 81 * oceanShade)));
-            d[i + 1] = Math.floor(Math.max(65, Math.min(165, 110 * oceanShade)));
-            d[i + 2] = Math.floor(Math.max(85, Math.min(195, 136 * oceanShade)));
+            const oceanShade = 0.94 + (lum - 1.0) * 0.28;
+            d[i] = Math.floor(Math.max(65, Math.min(135, 96 * oceanShade)));
+            d[i + 1] = Math.floor(Math.max(90, Math.min(165, 126 * oceanShade)));
+            d[i + 2] = Math.floor(Math.max(115, Math.min(195, 152 * oceanShade)));
           } else {
             // Mountain shaded relief on warm antique parchment (#ebe0c8)
             const lum = (r * 0.299 + g * 0.587 + b * 0.114) / 235.0;
